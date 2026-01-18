@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token dApp - Full Featured</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #4f1434 0%, #982a65 50%, #e48193 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #f9c6cf 0%, #e48193 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .wallet-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .address {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .balance {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #e48193;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button {
+            background: linear-gradient(135deg, #e48193 0%, #f9c6cf 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .button-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .button-secondary:hover:not(:disabled) {
+            background: #cbd5e0;
+        }
+
+        .gas-estimate {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .gas-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .gas-label {
+            color: #718096;
+        }
+
+        .gas-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .transaction-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .tx-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f9c6cf;
+        }
+
+        .tx-hash {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #667eea;
+            word-break: break-all;
+        }
+
+        .tx-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #4f1434;
+            border-left: 4px solid #f9c6cf;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>🪙 Token Transfer dApp</h1>
+            <p style="color: #666; margin-bottom: 20px;">Part 3: Full-Featured Token Management Interface</p>
+            
+            <button id="connectBtn" class="button">Connect Wallet</button>
+            
+            <div id="walletInfo" class="wallet-info hidden">
+                <div>
+                    <div class="address" id="userAddress">Not connected</div>
+                    <div class="balance" id="tokenBalance">0 TOKENS</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #718096;">ETH Balance</div>
+                    <div class="balance" id="ethBalance">0 ETH</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">
+                    <span>📤</span>
+                    <span>Transfer Tokens</span>
+                </div>
+
+                <div id="alertBox" class="hidden"></div>
+
+                <div class="input-group">
+                    <label class="input-label">Recipient Address</label>
+                    <input type="text" id="recipientInput" class="input-field" 
+                           placeholder="0x..." />
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Amount</label>
+                    <input type="number" id="amountInput" class="input-field" 
+                           placeholder="0.0" step="0.01" min="0" />
+                </div>
+
+                <div id="gasEstimateBox" class="gas-estimate hidden">
+                    <div class="gas-row">
+                        <span class="gas-label">Estimated Gas:</span>
+                        <span class="gas-value" id="gasEstimate">--</span>
+                    </div>
+                    <div class="gas-row">
+                        <span class="gas-label">Gas Price:</span>
+                        <span class="gas-value" id="gasPrice">--</span>
+                    </div>
+                    <div class="gas-row">
+                        <span class="gas-label">Total Cost:</span>
+                        <span class="gas-value" id="totalCost">--</span>
+                    </div>
+                </div>
+
+                <button id="estimateGasBtn" class="button button-secondary" style="margin-bottom: 10px;">
+                    Estimate Gas
+                </button>
+
+                <button id="transferBtn" class="button">
+                    Transfer Tokens
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <span>📋</span>
+                    <span>Transaction History</span>
+                </div>
+
+                <div id="txHistory" class="transaction-history">
+                    <div style="text-align: center; color: #a0aec0; padding: 40px 20px;">
+                        No transactions yet
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <script type="module">
+import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
+
+// Blockchain Interaction Class (ethers v5)
+class TokenDApp {
+  constructor() {
+    this.provider = null;
+    this.signer = null;
+    this.contract = null;
+    this.userAddress = null;
+    this.transactions = [];
+
+    // Minimal ERC20 ABI
+    this.contractABI = [
+      "function name() view returns (string)",
+      "function symbol() view returns (string)",
+      "function decimals() view returns (uint8)",
+      "function totalSupply() view returns (uint256)",
+      "function balanceOf(address) view returns (uint256)",
+      "function transfer(address to, uint256 amount) returns (bool)",
+      "event Transfer(address indexed from, address indexed to, uint256 value)"
+    ];
+
+    // ✅ your deployed token address (Hardhat/Anvil local)
+   this.contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  }
+
+  async connect() {
+    if (!window.ethereum) throw new Error("MetaMask not installed");
+
+    // ethers v5 provider
+    this.provider = new ethers.providers.Web3Provider(window.ethereum);
+    await this.provider.send("eth_requestAccounts", []);
+
+    this.signer = this.provider.getSigner();
+    this.userAddress = await this.signer.getAddress();
+
+    this.contract = new ethers.Contract(
+      this.contractAddress,
+      this.contractABI,
+      this.signer
+    );
+
+    this.setupEventListeners();
+    return this.userAddress;
+  }
+
+  setupEventListeners() {
+    // avoid stacking listeners on reloads
+    try {
+      window.ethereum.removeAllListeners("accountsChanged");
+      window.ethereum.removeAllListeners("chainChanged");
+    } catch (_) {}
+
+    window.ethereum.on("accountsChanged", () => window.location.reload());
+    window.ethereum.on("chainChanged", () => window.location.reload());
+
+    // Listen to all Transfer events and only record the ones related to current user
+    try {
+      this.contract.removeAllListeners("Transfer");
+      this.contract.on("Transfer", async (from, to, amount, event) => {
+        if (!this.userAddress) return;
+
+        const me = this.userAddress.toLowerCase();
+        const related =
+          (from && from.toLowerCase() === me) ||
+          (to && to.toLowerCase() === me);
+
+        if (!related) return;
+
+        const decimals = await this.contract.decimals();
+
+        this.addTransaction({
+          hash: event.transactionHash,
+          from,
+          to,
+          amount: ethers.utils.formatUnits(amount, decimals),
+          status: "success",
+          timestamp: new Date().toISOString()
+        });
+
+        await this.updateBalance();
+      });
+    } catch (_) {
+      // ignore event listener errors on some local nodes
+    }
+  }
+
+  async getBalance() {
+    const balance = await this.contract.balanceOf(this.userAddress);
+    const decimals = await this.contract.decimals();
+    return ethers.utils.formatUnits(balance, decimals);
+  }
+
+  async getEthBalance() {
+    const bal = await this.provider.getBalance(this.userAddress);
+    return ethers.utils.formatEther(bal);
+  }
+
+  async estimateTransferGas(to, amount) {
+    try {
+      const decimals = await this.contract.decimals();
+      const parsedAmount = ethers.utils.parseUnits(String(amount), decimals);
+
+      const gasLimit = await this.contract.estimateGas.transfer(to, parsedAmount);
+      const gasPrice = await this.provider.getGasPrice();
+      const totalWei = gasLimit.mul(gasPrice);
+
+      return {
+        gasLimit,
+        gasPrice,
+        totalCost: ethers.utils.formatEther(totalWei),
+        success: true
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error?.reason || error?.message || "Estimation failed"
+      };
+    }
+  }
+
+  async transfer(to, amount) {
+    const decimals = await this.contract.decimals();
+    const parsedAmount = ethers.utils.parseUnits(String(amount), decimals);
+
+    const tx = await this.contract.transfer(to, parsedAmount);
+
+    this.addTransaction({
+      hash: tx.hash,
+      from: this.userAddress,
+      to,
+      amount: String(amount),
+      status: "pending",
+      timestamp: new Date().toISOString()
+    });
+
+    const receipt = await tx.wait();
+    this.updateTransactionStatus(tx.hash, "success");
+
+    return receipt;
+  }
+
+  addTransaction(tx) {
+    this.transactions.unshift(tx);
+    this.renderTransactions();
+  }
+
+  updateTransactionStatus(hash, status) {
+    const t = this.transactions.find(x => x.hash === hash);
+    if (t) {
+      t.status = status;
+      this.renderTransactions();
+    }
+  }
+
+  renderTransactions() {
+    const container = document.getElementById("txHistory");
+
+    if (this.transactions.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; color: #a0aec0; padding: 40px 20px;">
+          No transactions yet
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = this.transactions
+      .map(tx => `
+        <div class="tx-item">
+          <div class="tx-hash">
+            ${tx.hash.substring(0, 10)}...${tx.hash.substring(tx.hash.length - 8)}
+          </div>
+          <div class="tx-details">
+            <div><strong>${tx.amount}</strong> tokens</div>
+            <span class="status-badge status-${tx.status}">
+              ${tx.status}
+            </span>
+          </div>
+          <div style="font-size: 11px; color: #a0aec0; margin-top: 5px;">
+            To: ${tx.to.substring(0, 6)}...${tx.to.substring(tx.to.length - 4)}
+          </div>
+        </div>
+      `)
+      .join("");
+  }
+
+  async updateBalance() {
+    const balance = await this.getBalance();
+    const symbol = await this.contract.symbol();
+
+    document.getElementById("tokenBalance").textContent =
+      `${Number(balance).toLocaleString()} ${symbol}`;
+
+    const ethBalance = await this.getEthBalance();
+    document.getElementById("ethBalance").textContent =
+      `${Number(ethBalance).toFixed(4)} ETH`;
+  }
+}
+
+// Initialize dApp
+const dapp = new TokenDApp();
+
+// UI Helpers
+function showAlert(message, type = "info") {
+  const alertBox = document.getElementById("alertBox");
+  alertBox.className = `alert alert-${type}`;
+  alertBox.textContent = message;
+  alertBox.classList.remove("hidden");
+  setTimeout(() => alertBox.classList.add("hidden"), 5000);
+}
+
+function setButtonLoading(button, isLoading, text = "") {
+  if (isLoading) {
+    button.disabled = true;
+    button.innerHTML = `<span class="loading"></span>${text || "Processing..."}`;
+  } else {
+    button.disabled = false;
+    button.innerHTML = text;
+  }
+}
+
+// Connect
+document.getElementById("connectBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("connectBtn");
+  setButtonLoading(btn, true, "Connecting...");
+
+  try {
+    await dapp.connect();
+    await dapp.updateBalance();
+
+    document.getElementById("walletInfo").classList.remove("hidden");
+    document.getElementById("userAddress").textContent =
+      `${dapp.userAddress.substring(0, 6)}...${dapp.userAddress.substring(dapp.userAddress.length - 4)}`;
+
+    setButtonLoading(btn, false, "✓ Connected");
+    btn.style.background = "#10b981";
+    showAlert("Successfully connected to wallet!", "success");
+  } catch (error) {
+    console.error(error);
+    setButtonLoading(btn, false, "Connect Wallet");
+    showAlert(error?.message || "Failed to connect wallet", "error");
+  }
+});
+
+// Estimate Gas
+document.getElementById("estimateGasBtn").addEventListener("click", async () => {
+  const recipient = document.getElementById("recipientInput").value.trim();
+  const amount = document.getElementById("amountInput").value;
+
+  if (!recipient || !amount) {
+    showAlert("Please enter recipient and amount", "error");
+    return;
+  }
+
+  if (!ethers.utils.isAddress(recipient)) {
+    showAlert("Invalid recipient address", "error");
+    return;
+  }
+
+  const btn = document.getElementById("estimateGasBtn");
+  setButtonLoading(btn, true, "Estimating...");
+
+  try {
+    const estimate = await dapp.estimateTransferGas(recipient, amount);
+
+    if (estimate.success) {
+      document.getElementById("gasEstimate").textContent = estimate.gasLimit.toString();
+      document.getElementById("gasPrice").textContent =
+        `${Number(ethers.utils.formatUnits(estimate.gasPrice, "gwei")).toFixed(2)} gwei`;
+      document.getElementById("totalCost").textContent =
+        `${Number(estimate.totalCost).toFixed(6)} ETH`;
+
+      document.getElementById("gasEstimateBox").classList.remove("hidden");
+      showAlert("Gas estimated successfully", "success");
+    } else {
+      showAlert(`Estimation failed: ${estimate.error}`, "error");
+    }
+  } catch (error) {
+    console.error(error);
+    showAlert("Failed to estimate gas", "error");
+  } finally {
+    setButtonLoading(btn, false, "Estimate Gas");
+  }
+});
+
+// Transfer
+document.getElementById("transferBtn").addEventListener("click", async () => {
+  const recipient = document.getElementById("recipientInput").value.trim();
+  const amount = document.getElementById("amountInput").value;
+
+  if (!recipient || !amount) {
+    showAlert("Please enter recipient and amount", "error");
+    return;
+  }
+
+  if (!ethers.utils.isAddress(recipient)) {
+    showAlert("Invalid recipient address", "error");
+    return;
+  }
+
+  const btn = document.getElementById("transferBtn");
+  setButtonLoading(btn, true, "Transferring...");
+
+  try {
+    const receipt = await dapp.transfer(recipient, amount);
+    await dapp.updateBalance();
+
+    document.getElementById("recipientInput").value = "";
+    document.getElementById("amountInput").value = "";
+    document.getElementById("gasEstimateBox").classList.add("hidden");
+
+    showAlert(`Transfer successful! Gas used: ${receipt.gasUsed.toString()}`, "success");
+  } catch (error) {
+    console.error(error);
+    if (error?.code === 4001) {
+      showAlert("Transaction rejected by user", "error");
+    } else {
+      showAlert(error?.reason || error?.message || "Transfer failed", "error");
+    }
+  } finally {
+    setButtonLoading(btn, false, "Transfer Tokens");
+  }
+});
+
+// Auto-connect if already permitted
+window.addEventListener("load", async () => {
+  if (window.ethereum) {
+    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+    if (accounts.length > 0) {
+      document.getElementById("connectBtn").click();
+    }
+  }
+});
+</script>
